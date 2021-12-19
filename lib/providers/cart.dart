@@ -60,7 +60,7 @@ class Cart with ChangeNotifier {
     notifyListeners();
   }
 
-  void removeItem(String productId, int quantity) {
+  void removeItem(String productId, [int quantity]) {
     if (_items.containsKey(productId) && quantity > 1) {
       //reducing cart qty
       _items.update(

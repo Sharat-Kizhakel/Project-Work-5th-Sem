@@ -14,6 +14,7 @@ class ProductItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final product = Provider.of<Product>(context, listen: false);
     final cart = Provider.of<Cart>(context, listen: false);
+    var qty;
     return ClipRRect(
       borderRadius: BorderRadius.circular(10.0),
       child: GridTile(
@@ -74,7 +75,28 @@ class ProductItem extends StatelessWidget {
             ),
             trailing: IconButton(
               onPressed: () {
-                cart.addItem(product.id, product.price, product.title,product.imageUrl);
+                cart.addItem(
+                    product.id, product.price, product.title, product.imageUrl);
+                Scaffold.of(context)
+                    .hideCurrentSnackBar(); //when adding items back to back to rapidly show item has been added removing current one
+                //alerting user on adding cart item, and giving option to undo it
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Item added!'),
+                    duration: Duration(seconds: 2),
+                    action: SnackBarAction(
+                      label: 'UNDO',
+                      onPressed: () {
+                        print(cart.itemCount);
+                        if (cart.items.containsKey(product.id)) {
+                          qty = cart.items[product.id].quantity;
+                        }
+                        cart.removeItem(product.id, qty);
+                        print(cart.itemCount);
+                      },
+                    ),
+                  ),
+                );
               },
               icon: Icon(Icons.shopping_cart),
               color: Theme.of(context).accentColor,
