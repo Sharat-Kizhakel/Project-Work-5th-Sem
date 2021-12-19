@@ -22,7 +22,7 @@ class CartItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final cartData = Provider.of<Cart>(context);
     return Dismissible(
-      key: ValueKey(id),
+      key: UniqueKey(),
       background: Container(
         color: Theme.of(context).errorColor,
         child: Icon(
@@ -38,6 +38,44 @@ class CartItem extends StatelessWidget {
         ),
       ),
       direction: DismissDirection.endToStart,
+      confirmDismiss: (direction) {
+        return showDialog(
+          //confirming deletion
+          context: context,
+          builder: (ctx) => AlertDialog(
+            backgroundColor: Colors.redAccent,
+            title: Text('Remove item from Cart?'),
+            content: Text('Confirm delete', style: TextStyle(fontSize: 16)),
+            actions: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  FlatButton(
+                    child: Text(
+                      'No',
+                    ),
+                    textColor: Colors.white,
+                    onPressed: () {
+                      Navigator.of(ctx).pop(false);
+                    },
+                  ),
+                  RaisedButton(
+                    child: Text(
+                      'Yes',
+                    ),
+                    color: Colors.white,
+                    textColor: Colors.redAccent,
+                    onPressed: () {
+                      Navigator.of(ctx).pop(true);
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
       onDismissed: (direction) {
         cartData.removeItem(productId, quantity);
       },
