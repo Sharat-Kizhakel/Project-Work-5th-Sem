@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../screens/products_screen.dart';
 import '../screens/orders_screen.dart';
 import '../screens/products_overview_screen.dart';
 
@@ -72,6 +73,14 @@ class SideDrawer extends StatelessWidget {
             },
           ),
           Divider(),
+          ListTile(
+            leading: Icon(Icons.edit),
+            title: Text('Manage Prodcuts'),
+            onTap: () {
+              Navigator.of(context)
+                  .pushReplacementNamed(ProductsScreen.routeName);
+            },
+          ),
         ],
       ),
     );
