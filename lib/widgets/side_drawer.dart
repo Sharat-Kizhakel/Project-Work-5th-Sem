@@ -75,7 +75,7 @@ class SideDrawer extends StatelessWidget {
           Divider(),
           ListTile(
             leading: Icon(Icons.edit),
-            title: Text('Manage Prodcuts'),
+            title: Text('Manage Products'),
             onTap: () {
               Navigator.of(context)
                   .pushReplacementNamed(ProductsScreen.routeName);
