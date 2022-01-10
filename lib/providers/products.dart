@@ -1,7 +1,37 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import './product.dart';
+import '../models/usermodel.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Products with ChangeNotifier {
+  List<UserModel> userModelList = [];
+  UserModel userModel;
+  //getting user data
+  Future<void> getUserData() async {
+    List<UserModel> newList = [];
+    User currentUser = FirebaseAuth.instance.currentUser;
+    QuerySnapshot userSnapShot =
+        await FirebaseFirestore.instance.collection("User").get();
+
+    userSnapShot.docs.forEach(
+      (element) {
+        if (currentUser.uid == (element.data() as dynamic)["UserId"]) {
+          userModel = UserModel(
+              userEmail: (element.data() as dynamic)["UserEmail"],
+              userName: (element.data() as dynamic)["UserName"],
+              userPhoneNumber: (element.data() as dynamic)["Phone Number"]);
+          newList.add(userModel);
+        }
+        userModelList = newList;
+      },
+    );
+  }
+
+  List<UserModel> get getUserModelList {
+    return userModelList;
+  }
+
   List<Product> _items = [
     Product(
       id: 'p1',

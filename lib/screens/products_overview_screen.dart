@@ -7,6 +7,7 @@ import '../widgets/badge.dart';
 import 'package:provider/provider.dart';
 import '../providers/cart.dart';
 import '../widgets/data_search.dart';
+import '../models/usermodel.dart';
 
 enum FilterMenu {
   wishlist,
@@ -15,6 +16,7 @@ enum FilterMenu {
 
 class ProductsOverviewScreen extends StatefulWidget {
   static const routeName = "/product-overview";
+
   @override
   _ProductsOverviewScreenState createState() => _ProductsOverviewScreenState();
 }
