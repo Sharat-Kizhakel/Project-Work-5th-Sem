@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class CartItem {
   final String id;
   final String title;
-  final int quantity;
-  final double price;
+  final num quantity;
+  final num price;
   final String imageUrl;
   CartItem({this.id, this.title, this.quantity, this.price, this.imageUrl});
 }
@@ -19,7 +21,7 @@ class Cart with ChangeNotifier {
     return _items.length;
   }
 
-  double get CartTotal {
+  num get CartTotal {
     var itemTotal = 0.0;
     for (var item in _items.values) {
       itemTotal += (item.quantity * item.price);
@@ -27,14 +29,14 @@ class Cart with ChangeNotifier {
     return itemTotal;
   }
 
-  double get CartTotalAfter {
+  num get CartTotalAfter {
     //cart total after tax
     var grandTotal = 0.0;
     grandTotal = CartTotal + (0.18 * CartTotal);
     return grandTotal;
   }
 
-  void addItem(String productId, double price, String title, String imageUrl) {
+  void addItem(String productId, num price, String title, String imageUrl) {
     if (_items.containsKey(productId)) {
       //if present just increasing the quantity
       _items.update(
@@ -56,6 +58,8 @@ class Cart with ChangeNotifier {
             quantity: 1,
             imageUrl: imageUrl),
       );
+      print("Inside add");
+      print(items);
     }
     notifyListeners();
   }

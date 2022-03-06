@@ -48,13 +48,13 @@ class ProductsScreen extends StatelessWidget {
       body: Padding(
         padding: EdgeInsets.all(8),
         child: ListView.builder(
-          itemCount: ProductData.items.length,
+          itemCount: ProductData.prodModelList.length,
           itemBuilder: (_, i) => Column(
             children: [
               ProdScreenItem(
-                ProductData.items[i].id,
-                ProductData.items[i].title,
-                ProductData.items[i].imageUrl,
+                ProductData.prodModelList[i].id,
+                ProductData.prodModelList[i].title,
+                ProductData.prodModelList[i].imageUrl,
               ),
               Divider(),
             ],

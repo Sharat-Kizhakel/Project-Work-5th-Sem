@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-
+import '../providers/product.dart';
+import '../widgets/product_item.dart';
+import '../screens/product_detail_screen.dart';
 import '../widgets/custom_appBar.dart';
 import '../providers/products.dart';
 import 'package:provider/provider.dart';
@@ -34,93 +36,134 @@ class DataSearch extends SearchDelegate<String> {
   @override
   Widget buildResults(BuildContext context) {
     //results
-    final products = Provider.of<Products>(context).items;
-
-    final suggestionList = query.isEmpty
-        ? "No result found"
-        : products
-            .where(
-              (prod) => prod.title.contains(query), //matching query dynamically
-            )
-            .map((prod) => prod.title)
-            .toList()
-            .toString();
-    final productByTitle =
-        Provider.of<Products>(context).findByTitle(suggestionList);
+    final test = Provider.of<Products>(context);
+    final suggestionList = test.searchProduct(query);
     print(suggestionList);
+    // List<Product> suggestionList = products
+    //     .where(
+    //       (prod) => prod.title.contains(query), //matching query dynamically
+    //     )
+    //     .toList();
+    return GridView.count(
+        padding: const EdgeInsets.all(2.0),
+        crossAxisCount: 2,
+        childAspectRatio: 2 / 2.7,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        children: suggestionList
+            .map((e) => GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                          builder: (ctx) => ProductDetailScreen(),
+                          settings: RouteSettings(arguments: e.id)),
+                    );
+                  },
+                  child: ProductItem(
+                    e.id,
+                    e.title,
+                    e.imageUrl,
+                    e.price,
+                  ),
+                ))
+            .toList());
+    // print("in build results");
+    // // print(suggestionList[0].id);
+    // // var SearchedProduct = test.findByTitle(suggestionList);
+    // print("id");
+    // // print(suggestionList[0].id);
+    // Future<void> ProdDetail() async {
+    //   // await Navigator.of(context).pushNamed(
+    //   //   ProductDetailScreen.routeName,
+    //   //   arguments: suggestionList[0].id, //product.id,
+    //   // );
+    //   await Navigator.of(context).push(MaterialPageRoute(
+    //     builder: (context) => ProductDetailScreen(),
+    //     settings: RouteSettings(arguments: suggestionList[0].id),
+    //   ));
+    // }
 
-    // return   SingleChildScrollView(
-    //       child: Column(
-    //         children: [
-    //           Container(
-    //             height: 300,
-    //             width: double.infinity,
-    //             child: Image.network(
-    //               loadedProduct.imageUrl,
-    //               fit: BoxFit.cover,
-    //             ),
-    //           ),
-    //           SizedBox(
-    //             height: 10,
-    //           ),
-    //           Text(
-    //             '${loadedProduct.price}',
-    //             style: TextStyle(
-    //               color: Colors.grey,
-    //               fontSize: 20,
-    //             ),
-    //           ),
-    //           SizedBox(
-    //             height: 10,
-    //           ),
-    //           Container(
-    //             padding: EdgeInsets.symmetric(horizontal: 10),
-    //             width: double.infinity,
-    //             child: Text(
-    //               loadedProduct.description,
-    //               textAlign: TextAlign.center,
-    //               softWrap: true,
-    //             ),
-    //           ),
-    //         ],
+    // if (suggestionList.isNotEmpty) {
+    //   ProdDetail();
+    // } else {
+    //   return Center(
+    //     child: Container(
+    //       height: MediaQuery.of(context).size.height * 0.60,
+    //       width: MediaQuery.of(context).size.width * 0.60,
+    //       child: Text(
+    //         "PLEASE ENTER A QUERY!!",
+    //         style: TextStyle(fontWeight: FontWeight.bold),
     //       ),
+    //     ),
+    //   );
+    // }
   }
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    final products = Provider.of<Products>(context).items;
-    final suggestionList = query.isEmpty
-        ? products.sublist(0, 4)
-        : products
-            .where(
-              (prod) =>
-                  prod.title.startsWith(query), //matching query dynamically
-            )
-            .toList();
-    return ListView.builder(
-      itemBuilder: (ctx, i) => ListTile(
-        onTap: () {
-          showResults(context);
-        },
-        title: RichText(
-          text: TextSpan(
-            text: suggestionList[i].title.substring(0, query.length),
-            //highlighting the query user types
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-            //keeping the rest of suggestion faint
-            children: [
-              TextSpan(
-                text: suggestionList[i].title.substring(
-                      query.length,
-                    ),
-                style: TextStyle(color: Colors.grey),
-              )
-            ],
-          ),
-        ),
-      ),
-      itemCount: suggestionList.length,
-    );
+    final test = Provider.of<Products>(context);
+    final products = test.searchProduct(query);
+    List tempsuggestion = [];
+    List newtempsuggestion = [];
+    return GridView.count(
+        crossAxisCount: 2,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        children: products
+            .map((e) => GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                          builder: (ctx) => ProductDetailScreen(),
+                          settings: RouteSettings(arguments: e.id)),
+                    );
+                  },
+                  child: ProductItem(
+                    e.id,
+                    e.title,
+                    e.imageUrl,
+                    e.price,
+                  ),
+                ))
+            .toList());
+    // for (int i = 0; i < products.length; i++) {
+    //   tempsuggestion.add(products[i].title);
+    // }
+    // print(tempsuggestion);
+    // final suggestionList = query.isEmpty
+    //     ? products
+    //     : products
+    //         .where(
+    //           (prod) =>
+    //               prod.title.startsWith(query), //matching query dynamically
+    //         )
+    //         .toList();
+    // print("in buildsuggestions");
+    // print(suggestionList);
+    // return ListView.builder(
+    //   itemBuilder: (ctx, i) => ListTile(
+    //     onTap: () {
+    //       showResults(context);
+    //     },
+    //   title: RichText(
+    //       text: TextSpan(
+    //         text: suggestionList[i].title.substring(0, query.length),
+    //         //highlighting the query user types
+    //         style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+    //         //keeping the rest of suggestion faint
+    //         children: [
+    //           TextSpan(
+    //             text: suggestionList[i].title.substring(
+    //                   query.length,
+    //                 ),
+    //             style: TextStyle(color: Colors.grey),
+    //           )
+    //         ],
+    //       ),
+    //     ),
+    //   ),
+    //   itemCount: suggestionList.length,
+    // );
   }
 }
 

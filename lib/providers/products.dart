@@ -5,8 +5,11 @@ import '../models/usermodel.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class Products with ChangeNotifier {
+  int c = 0;
   List<UserModel> userModelList = [];
+  List<Product> prodModelList = [];
   UserModel userModel;
+  Product productData;
   //getting user data
   Future<void> getUserData() async {
     List<UserModel> newList = [];
@@ -18,6 +21,7 @@ class Products with ChangeNotifier {
       (element) {
         if (currentUser.uid == (element.data() as dynamic)["UserId"]) {
           userModel = UserModel(
+              userImage: (element.data() as dynamic)["UserImage"],
               userEmail: (element.data() as dynamic)["UserEmail"],
               userName: (element.data() as dynamic)["UserName"],
               userPhoneNumber: (element.data() as dynamic)["Phone Number"]);
@@ -28,10 +32,74 @@ class Products with ChangeNotifier {
     );
   }
 
+  Future<void> getProductData() async {
+    List<Product> prodList = [];
+
+    QuerySnapshot prodSnapShot = await FirebaseFirestore.instance
+        .collection("availableproducts")
+        .doc("W6nYSQsDErlx93IHJicg")
+        .collection("homescreen")
+        .get();
+    //adding a favorite fields to all docs
+    if (c == 0) {
+      prodSnapShot.docs.forEach((element) {
+        element.reference.update({'isFavorite': false});
+        c++;
+      });
+    }
+
+    prodSnapShot.docs.forEach(
+      (element) {
+        print("Element id");
+        print(element.id);
+        // DocumentReference ref = FirebaseFirestore.instance
+        //     .collection("availableproducts")
+        //     .doc("W6nYSQsDErlx93IHJicg")
+        //     .collection("homescreen")
+        //     .doc(element.id);
+
+        productData = Product(
+            id: element.id,
+            title: (element.data() as dynamic)["title"],
+            price: (element.data() as dynamic)["price"],
+            description: (element.data() as dynamic)["description"],
+            imageUrl: (element.data() as dynamic)["imageurl"],
+            isFavorite: (element.data() as dynamic)["isFavorite"]);
+        print("Printing Product id:");
+        print(productData.id);
+        print("Printing Product imageurl:");
+        print(productData.imageUrl);
+        print("Printing Product description:");
+        print(productData.description);
+        print("Printing Product price:");
+        print(productData.price);
+        print("print isfavorite");
+        print(productData.isFavorite);
+        prodList.add(productData);
+      },
+    );
+
+    print("products wala");
+
+    prodModelList = prodList;
+    print(prodModelList);
+    print(prodModelList[0].price);
+    print(prodModelList[1].price);
+
+    // return prodModelList;
+  }
+
+  List<Product> get productModelList {
+    print("Inside getter");
+    print(prodModelList);
+    return prodModelList;
+  }
+
   List<UserModel> get getUserModelList {
     return userModelList;
   }
 
+//this section not needed just dummy data
   List<Product> _items = [
     Product(
       id: 'p1',
@@ -101,41 +169,109 @@ class Products with ChangeNotifier {
   // }
 
   Product findById(String id) {
-    return _items.firstWhere((prod) => prod.id == id);
+    print("Inside find by id");
+    print(id);
+    print(prodModelList.firstWhere((prod) => prod.id == id));
+    return prodModelList.firstWhere((prod) => prod.id == id);
   }
 
   Product findByTitle(String title) {
-    return _items.firstWhere((prod) => prod.title == title);
+    return prodModelList.firstWhere((prod) => prod.title == title);
   }
 
   List<Product> get getFavs {
-    return _items.where((prod) => prod.isFavorite).toList();
+    print("Inside get fav");
+    print(prodModelList.where((prod) => prod.isFavorite).toList());
+    return prodModelList.where((prod) => prod.isFavorite).toList();
   }
 
-  void addProduct(Product product) {
+  Future<void> addProduct(Product product) async {
+    //uploading after user adds product
+    print("Inside add product");
+    print(product.isFavorite);
+    var docref = await FirebaseFirestore.instance
+        .collection("availableproducts")
+        .doc("W6nYSQsDErlx93IHJicg")
+        .collection("homescreen")
+        .add({
+      "description": product.description,
+      "imageurl": product.imageUrl,
+      "title": product.title,
+      "price": product.price,
+      "isFavorite": product.isFavorite
+    });
     final newProduct = Product(
-        id: DateTime.now().toString(),
+        id: docref.id,
         title: product.title,
         price: product.price,
         description: product.description,
-        imageUrl: product.imageUrl);
-    _items.add(newProduct);
-
+        imageUrl: product.imageUrl,
+        isFavorite: product.isFavorite);
+    prodModelList.add(newProduct);
+    print("test");
+    print(prodModelList);
     notifyListeners();
   }
 
+  void updateFavStatus(String id, bool isfav) {
+    var colref = FirebaseFirestore.instance
+        .collection("availableproducts")
+        .doc("W6nYSQsDErlx93IHJicg")
+        .collection("homescreen");
+    colref.doc(id) // <-- Doc ID where data should be updated.
+        .update({"isFavorite": isfav});
+
+    print("Inside toggle");
+    print(isfav);
+    // notifyListeners();
+  }
+
   void updateProduct(String id, Product newProduct) {
-    final prodIndex = _items.indexWhere((prod) => prod.id == id);
+    final prodIndex = prodModelList.indexWhere((prod) => prod.id == id);
+    print("In update product");
+    print(id);
+    print(prodIndex);
     if (prodIndex >= 0) {
-      _items[prodIndex] = newProduct;
+      prodModelList[prodIndex] = newProduct;
+      var colref = FirebaseFirestore.instance
+          .collection("availableproducts")
+          .doc("W6nYSQsDErlx93IHJicg")
+          .collection("homescreen");
+      colref.doc(id) // <-- Doc ID where data should be updated.
+          .update({
+        "description": newProduct.description,
+        "imageurl": newProduct.imageUrl,
+        "title": newProduct.title,
+        "price": newProduct.price,
+      });
+
       notifyListeners();
     } else {
       print('...');
     }
   }
 
-  void deleteProduct(String id) {
-    _items.removeWhere((prod) => prod.id == id);
+  List<Product> searchProduct(String query) {
+    List<Product> searchprod = prodModelList.where((element) {
+      return element.title.toUpperCase().contains(query) ||
+          element.title.toLowerCase().contains(query);
+    }).toList();
+    return searchprod;
+  }
+
+  Future<void> deleteProduct(String id) async {
+    print("Inside delete");
+    prodModelList.removeWhere((prod) => prod.id == id);
+    print("List check:");
+    print(prodModelList);
+    var colref = FirebaseFirestore.instance
+        .collection("availableproducts")
+        .doc("W6nYSQsDErlx93IHJicg")
+        .collection("homescreen");
+    print(colref);
+    print(colref.doc(id));
+    await colref.doc(id).delete();
+    print("After delete");
     notifyListeners();
   }
 }

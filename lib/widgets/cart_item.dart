@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 class CartItem extends StatelessWidget {
   final String id;
   final String productId; //item to be deleted
-  final double price;
+  final num price;
   final int quantity;
   final String title;
   final String imageUrl;

@@ -4,16 +4,20 @@ class Product with ChangeNotifier {
   final String id;
   final String title;
   final String description;
-  final double price;
+  final num price;
   final String imageUrl;
   bool isFavorite;
 
   Product(
-      {@required this.id,
-      @required this.title,
-      @required this.price,
-      @required this.description,
-      @required this.imageUrl,
+      {this.id,
+      //@required
+      this.title,
+      //@required
+      this.price,
+      //@required
+      this.description,
+      //@required
+      this.imageUrl,
       this.isFavorite = false});
 
   void toggleFavStatus() {
@@ -22,4 +26,4 @@ class Product with ChangeNotifier {
   }
 }
 
-//to notify listeners on changing fav status 
+//to notify listeners on changing fav status

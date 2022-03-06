@@ -1,3 +1,5 @@
+// import 'dart:html';
+
 import 'package:flutter/material.dart';
 import '../widgets/side_drawer.dart';
 import '../screens/cart_screen.dart';
@@ -7,7 +9,11 @@ import '../widgets/badge.dart';
 import 'package:provider/provider.dart';
 import '../providers/cart.dart';
 import '../widgets/data_search.dart';
+import '../providers/products.dart';
 import '../models/usermodel.dart';
+import '../models/slider_item.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 enum FilterMenu {
   wishlist,
@@ -23,30 +29,10 @@ class ProductsOverviewScreen extends StatefulWidget {
 
 class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
   var showOnlyfav = false;
-
+  Widget image_carousel;
   @override
   Widget build(BuildContext context) {
-    Widget image_carousel = new Container(
-      height: 150.0,
-      child: new Carousel(
-        boxFit: BoxFit.cover,
-        images: [
-          Image.network(
-              'https://media.gettyimages.com/photos/close-up-of-a-white-mens-shirts-picture-id157567639?k=20&m=157567639&s=612x612&w=0&h=r5oyOHpJjtuNUWBi3nuuliHVDVhyaevCkr-ml1bhTDk='),
-          Image.network(
-              'https://media.gettyimages.com/photos/elegant-black-leather-shoes-picture-id172417586?k=20&m=172417586&s=612x612&w=0&h=DDjvQhRgSYcH2F5rVt8iohGvkqCIteYuTCq3wpJuUi4='),
-          Image.network(
-              'https://media.gettyimages.com/photos/skinny-tight-blue-jeans-on-white-background-picture-id173239968?k=20&m=173239968&s=612x612&w=0&h=PjNPntBEnEjhFD2CYzaiCfSAmiapQVqPZWfOz-iD8kk='),
-          Image.network(
-              'https://media.gettyimages.com/photos/baseball-jersey-on-coat-hanger-picture-id163514652?k=20&m=163514652&s=612x612&w=0&h=Id6678y-NhIz4xot0CMEauFCZcGYmMHWtK-hijKOxIA='),
-        ],
-        autoplay: true,
-        animationCurve: Curves.fastOutSlowIn,
-        animationDuration: Duration(milliseconds: 1000),
-        dotSize: 6.0,
-        indicatorBgPadding: 3,
-      ),
-    );
+    final productsData = Provider.of<Products>(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.orange.shade100,
@@ -170,7 +156,39 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
       drawer: SideDrawer(),
       body: new ListView(
         children: <Widget>[
-          image_carousel,
+          FutureBuilder(
+            future: FirebaseFirestore.instance
+                .collection("products")
+                .doc("HaHPxggDDZkSwJqGOpro")
+                .collection("featureproduct")
+                .get(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting)
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              else {
+                image_carousel = new Container(
+                  height: 150.0,
+                  child: new Carousel(
+                    boxFit: BoxFit.cover,
+                    images: [
+                      Image.network(snapshot.data.docs[0]["image"]),
+                      Image.network(snapshot.data.docs[1]["image"]),
+                      Image.network(snapshot.data.docs[2]["image"]),
+                      Image.network(snapshot.data.docs[3]["image"]),
+                    ],
+                    autoplay: true,
+                    animationCurve: Curves.fastOutSlowIn,
+                    animationDuration: Duration(milliseconds: 1000),
+                    dotSize: 6.0,
+                    indicatorBgPadding: 3,
+                  ),
+                );
+                return image_carousel;
+              }
+            },
+          ),
           new Padding(
             padding: const EdgeInsets.all(20.0),
             child: Text(
@@ -183,7 +201,17 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
           ),
           Container(
             height: 300,
-            child: ProductsGrid(showOnlyfav),
+            child: FutureBuilder(
+                future: productsData.getProductData(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting)
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  else {
+                    return ProductsGrid(showOnlyfav);
+                  }
+                }),
           ),
         ],
       ),

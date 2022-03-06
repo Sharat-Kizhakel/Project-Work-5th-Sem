@@ -46,6 +46,8 @@ class _EditScreenState extends State<EditScreen> {
   void didChangeDependencies() {
     if (_isInit) {
       final productId = ModalRoute.of(context).settings.arguments as String;
+      print("Check id:");
+      print(productId);
       if (productId != null) {
         _editedProduct = Provider.of<Products>(context, listen: false)
             .findById(productId); //We got the product
@@ -55,6 +57,7 @@ class _EditScreenState extends State<EditScreen> {
           'price': _editedProduct.price.toString(),
           'imageUrl': '',
         };
+        print("Inside change dependencies###");
         _imageUrlController.text = _editedProduct
             .imageUrl; //controller and initalval cant be used together hence initalizing
       }

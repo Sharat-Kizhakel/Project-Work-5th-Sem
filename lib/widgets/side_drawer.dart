@@ -7,6 +7,7 @@ import '../providers/products.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import '../screens/login.dart';
+import '../screens/profile_screen.dart';
 
 class SideDrawer extends StatelessWidget {
   Widget _buildUserAccountsDrawerHeader(List<UserModel> userModel) {
@@ -20,10 +21,9 @@ class SideDrawer extends StatelessWidget {
         currentAccountPicture: GestureDetector(
           child: CircleAvatar(
             backgroundColor: Colors.grey,
-            child: Icon(
-              Icons.person,
-              color: Colors.white,
-            ),
+            backgroundImage: e.userImage == null
+                ? AssetImage("assets/user.png")
+                : NetworkImage(e.userImage),
           ),
         ),
         decoration: BoxDecoration(
@@ -44,7 +44,7 @@ class SideDrawer extends StatelessWidget {
     final productProvider = Provider.of<Products>(context);
     // String check = 'sdfsd';
     print(productProvider.getUserData().then((ele) {
-      print("got data");
+      print("got user data am in drawer");
     }));
     List<UserModel> userModel = productProvider.userModelList;
 
@@ -114,6 +114,17 @@ class SideDrawer extends StatelessWidget {
               Navigator.of(context)
                   .pushReplacementNamed(ProductsScreen.routeName);
             },
+          ),
+          ListTile(
+            onTap: () {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (ctx) => ProfileScreen(),
+                ),
+              );
+            },
+            leading: Icon(Icons.info),
+            title: Text("Profile"),
           ),
           ListTile(
             onTap: () {
